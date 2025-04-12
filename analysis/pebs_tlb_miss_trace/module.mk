@@ -26,7 +26,7 @@ MEM_BINS_4KB_CSV_FILE := $(MODULE_NAME)/mem_bins_4kb.csv
 
 PEBS_TARGET_FILES := $(MEM_ACCESSES_FILE) $(MEM_ACCESS_COUNT_FILE) $(MEM_BINS_4KB_CSV_FILE) $(MEM_BINS_2MB_CSV_FILE) $(MEM_BINS_2MB_CHART_FILE) $(WINDOW_2MB_FILE) $(WINDOW_4KB_FILE)
 
-$(HOT_REGION_FILE): $(WINDOW_4KB_FILE)
+$(HOT_REGION_FILE): |$(WINDOW_4KB_FILE)
 	diff $< $@ > /dev/null 2>&1 || cp --update $< $@
 
 $(MODULE_NAME): $(PEBS_TARGET_FILES)
@@ -36,7 +36,7 @@ $(WINDOW_2MB_FILE): $(MEMORY_FOOTPRINT_FILE) $(MEM_BINS_2MB_CSV_FILE)
 	mem_footprint=$(shell tail -n1 $< | cut -d ',' -f 4)
 	$(FIND_WINDOW) --input_file=$(MEM_BINS_2MB_CSV_FILE) --output_file=$@ --memory_footprint=$$mem_footprint --page_size=2MB
 
-$(WINDOW_4KB_FILE): $(MEMORY_FOOTPRINT_FILE) $(MEM_BINS_4KB_CSV_FILE)
+$(WINDOW_4KB_FILE): $(MEMORY_FOOTPRINT_FILE) |$(MEM_BINS_4KB_CSV_FILE)
 	mem_footprint=$(shell tail -n1 $< | cut -d ',' -f 4)
 	$(FIND_WINDOW) --input_file=$(MEM_BINS_4KB_CSV_FILE) --output_file=$@ --memory_footprint=$$mem_footprint --page_size=4KB
 
@@ -44,7 +44,7 @@ $(MEM_BINS_2MB_CHART_FILE): $(MEM_BINS_2MB_CSV_FILE)
 	$(PLOT_BINS) --input=$^ --output=$@ \
 		--figure_y_label="tlb misses" --time_windows=1
 
-$(MEM_BINS_4KB_CSV_FILE): $(PEBS_EXP_OUT_DIR)
+$(MEM_BINS_4KB_CSV_FILE): |$(PEBS_EXP_OUT_DIR)
 	{ $(PERF_MEM_REPORT_PREFIX) -i $^/perf.data report | \
 		$(FIX_DELIM_IN_PERF_MEM_OUTPUT_HEADER) | \
 		$(BIN_ADDRESSES) --width=4096 --output=$@ \
@@ -53,7 +53,7 @@ $(MEM_BINS_4KB_CSV_FILE): $(PEBS_EXP_OUT_DIR)
 $(MEM_BINS_2MB_BRK_RATIO_CSV_FILE): $(MEM_BINS_2MB_CSV_FILE)
 	$(CALCULATE_PAGES_WEIGHTS) --type brk --input $< --output $@
 
-$(MEM_BINS_2MB_CSV_FILE): $(PEBS_EXP_OUT_DIR) $(WINDOW_4KB_FILE)
+$(MEM_BINS_2MB_CSV_FILE): $(PEBS_EXP_OUT_DIR) 
 	{ $(PERF_MEM_REPORT_PREFIX) -i $^/perf.data report | \
 		$(FIX_DELIM_IN_PERF_MEM_OUTPUT_HEADER) | \
 		$(BIN_ADDRESSES) --width=$$(( 2**21 )) --output=$@ \
