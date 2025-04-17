@@ -177,7 +177,7 @@ for root, dirs, files in os.walk(args.results_root_dir):
         if df is None:
             df = exp_df
         else:
-            df = df.append(exp_df)
+            df = pd.concat([df, exp_df], ignore_index=True)
 
 df = df.sort_values('walk_cycles').reset_index()
 
