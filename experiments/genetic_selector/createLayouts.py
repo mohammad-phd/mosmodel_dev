@@ -26,9 +26,11 @@ def loadDataframe(mean_file):
 
 page_size = 1 << 21
 def writeLayout(layout, windows, start_offset, output):
+    max_page = max(windows)
+    brk_size = max((max_page+2)*page_size, brk_footprint) # +2 are: one for the end of the last page, and additional one for rounding up the last_page+offset
     configuration = Configuration()
     configuration.setPoolsSize(
-            brk_size=brk_footprint,
+            brk_size=brk_size,
             file_size=1*gb,
             mmap_size=mmap_footprint)
     for w in windows:
