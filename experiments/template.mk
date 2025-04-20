@@ -42,7 +42,8 @@ endef
 define TASKSET_EXPS_template =
 $(EXPERIMENT_DIR)/$(1)/$(2)/perf.out: %/$(2)/perf.out: $(EXPERIMENT_DIR)/layouts/$(1).csv | experiments-prerequisites 
 	echo ========== [INFO] reserve hugepages before start running: $$@ ==========
-	$$(TASKSET_PREFIX) $$(RUN_MOSALLOC_TOOL) --library $$(MOSALLOC_TOOL) -cpf $$(ROOT_DIR)/$$< $$(EXTRA_ARGS_FOR_MOSALLOC) -- sleep 0.1 > /dev/null 2>&1
+	$$(TASKSET_PREFIX) $$(RUN_MOSALLOC_TOOL) --library $$(MOSALLOC_TOOL) -cpf $$(ROOT_DIR)/$$< $$(EXTRA_ARGS_FOR_MOSALLOC) -- sleep 0.1 > /dev/null 2>&1 \
+		|| $$(TASKSET_PREFIX) $$(RUN_MOSALLOC_TOOL) --library $$(MOSALLOC_TOOL) -cpf $$(ROOT_DIR)/$$< $$(EXTRA_ARGS_FOR_MOSALLOC) -- sleep 0.1
 	echo ========== [INFO] start producing: $$@ ==========
 	$$(RUN_BENCHMARK) \
 		--prefix="$$(MEASURE_GENERAL_METRICS) $$(TASKSET_PREFIX)" \
