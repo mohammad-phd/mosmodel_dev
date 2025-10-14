@@ -26,7 +26,7 @@ MEM_BINS_4KB_CSV_FILE := $(MODULE_NAME)/mem_bins_4kb.csv
 
 PEBS_TARGET_FILES := $(MEM_ACCESSES_FILE) $(MEM_ACCESS_COUNT_FILE) $(MEM_BINS_4KB_CSV_FILE) $(MEM_BINS_2MB_CSV_FILE) $(MEM_BINS_2MB_CHART_FILE) $(WINDOW_2MB_FILE) $(WINDOW_4KB_FILE)
 
-$(HOT_REGION_FILE): |$(WINDOW_4KB_FILE)
+$(HOT_REGION_FILE): $(WINDOW_4KB_FILE)
 	diff $< $@ > /dev/null 2>&1 || cp --update $< $@
 
 $(MODULE_NAME): $(PEBS_TARGET_FILES)
@@ -44,7 +44,7 @@ $(MEM_BINS_2MB_CHART_FILE): $(MEM_BINS_2MB_CSV_FILE)
 	$(PLOT_BINS) --input=$^ --output=$@ \
 		--figure_y_label="tlb misses" --time_windows=1
 
-$(MEM_BINS_4KB_CSV_FILE): |$(PEBS_EXP_OUT_DIR)
+$(MEM_BINS_4KB_CSV_FILE): $(PEBS_EXP_OUT_DIR)
 	{ $(PERF_MEM_REPORT_PREFIX) -i $^/perf.data report | \
 		$(FIX_DELIM_IN_PERF_MEM_OUTPUT_HEADER) | \
 		$(BIN_ADDRESSES) --width=4096 --output=$@ \
